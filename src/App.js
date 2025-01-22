@@ -6,6 +6,7 @@ import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } f
 import ClientPage from './ClientPage';
 import VendeurPage from './VendeurPage';
 import './App.css';
+import AdminPage from './AdminPage';
 
 function App() {
   const [isLogin, setIsLogin] = useState(true);
@@ -38,9 +39,8 @@ function App() {
 
     const auth = getAuth();
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      const uid = userCredential.user.uid;
-
+      await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      setMessage({ text: 'Connexion réussie!', type: 'success' });
       const usersRef = collection(db, 'users');
       const q = query(usersRef, where('email', '==', formData.email));
       const querySnapshot = await getDocs(q);
@@ -51,6 +51,10 @@ function App() {
           navigate('/client');
         } else if (userData.role === 'Vendeur') {
           navigate('/vendeur');
+          
+        }
+        else  if (userData.role === 'admin'){
+          navigate('/Admin');
         }
       }
     } catch (error) {
@@ -182,6 +186,7 @@ function AppWithRouter() {
         <Route path="/" element={<App />} />
         <Route path="/client" element={<ClientPage />} />
         <Route path="/vendeur" element={<VendeurPage />} />
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
