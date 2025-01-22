@@ -43,8 +43,7 @@ const VendeurPage = () => {
           width: '40px', 
           height: '40px', 
           borderRadius: '50%', 
-          cursor: 'pointer' 
-        }}
+          cursor: 'pointer'         }}
       />
 
       {showProfile && userData && (
