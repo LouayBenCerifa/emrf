@@ -28,7 +28,7 @@ const VendeurPage = () => {
 
   return (
     <div style={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#f5f5f5', minHeight: '100vh', position: 'relative' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px', backgroundColor: '#007bff', color: '#ffffff' }}>
+      <header style={{  display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px', backgroundColor: '#007bff', color: '#ffffff' }}>
         <h1 style={{ margin: 0, marginLeft:'40%' }}>eCommerce</h1>
       </header>
 
@@ -39,11 +39,12 @@ const VendeurPage = () => {
         style={{ 
           position: 'absolute', 
           top: '1.5%', 
-          right: '20px',  
+          right: '20px', 
           width: '40px', 
           height: '40px', 
           borderRadius: '50%', 
-          cursor: 'pointer'         }}
+          cursor: 'pointer' 
+        }}
       />
 
       {showProfile && userData && (
@@ -62,11 +63,27 @@ const VendeurPage = () => {
           </button>
         </div>
       )}
-      {!showProfile  && (<main style={{ maxWidth: '800px', margin: '20px auto', padding: '20px', backgroundColor: '#ffffff', borderRadius: '10px', boxShadow: '0 6px 20px rgba(0, 0, 0, 0.1)' }}>
+
+      {!showProfile && (
+        <main style={{ maxWidth: '800px', margin: '20px auto', padding: '20px', backgroundColor: '#ffffff', borderRadius: '10px', boxShadow: '0 6px 20px rgba(0, 0, 0, 0.1)' }}>
         <h2>Bienvenue, {userData.nom} {userData.prenom}</h2>
-        <p>Voici vos statistiques de vente :</p>
-        {/* Ajoutez ici les composants ou les informations de statistiques */}
-      </main>)}
+        <p>Voici vos Produits :</p>
+        <div style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
+          <button 
+            onClick={() => navigate('/ajouter-produit')} 
+            style={{ padding: '10px 20px', backgroundColor: '#28a745', color: '#ffffff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+          >
+            Ajouter un produit
+          </button>
+          <button 
+            onClick={() => navigate('/gerer-ventes')} 
+            style={{ padding: '10px 20px', backgroundColor: '#ffc107', color: '#000000', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+          >
+            Gérer les ventes
+          </button>
+        </div>
+      </main>
+      )}
     </div>
   );
 };

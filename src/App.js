@@ -8,6 +8,7 @@ import VendeurPage from './VendeurPage';
 import './App.css';
 import AdminPage from './AdminPage';
 import ProfilePage from './ProfilePage';
+import AjouterProduit from './ajouter-produit';
 
 function App() {
   const [isLogin, setIsLogin] = useState(true);
@@ -199,6 +200,7 @@ function AppWithRouter() {
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/client" element={<ClientPage />} />
+        <Route path="/ajouter-produit" element={<AjouterProduit />} />
         <Route path="/vendeur" element={<VendeurPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/admin" element={<AdminPage />} />
