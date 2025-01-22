@@ -45,17 +45,31 @@ function App() {
       const usersRef = collection(db, 'users');
       const q = query(usersRef, where('email', '==', formData.email));
       const querySnapshot = await getDocs(q);
+      
       if (!querySnapshot.empty) {
         const userData = querySnapshot.docs[0].data();
+        const Data={
+          role:userData.role,
+          nom:userData.nom,
+          prenom:userData.prenom,
+          email:userData.email,
+          tel:userData.tel,
+          adresse:userData.adresse,
+        }
+        localStorage.setItem('userData', JSON.stringify(Data));
         if (userData.role === 'Client') {
           navigate('/client');
+          module.exports = Data;
         } else if (userData.role === 'Vendeur') {
           navigate('/vendeur');
-          
+          module.exports = Data;
         }
         else  if (userData.role === 'admin'){
           navigate('/Admin');
+          module.exports = Data;
         }
+        
+        
       }
     } catch (error) {
       console.error('Erreur lors de la connexion:', error);
