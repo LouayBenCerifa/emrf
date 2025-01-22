@@ -143,9 +143,10 @@ function App() {
                 <label htmlFor="adresse">Adresse</label>
                 <textarea id="adresse" value={formData.adresse} onChange={handleChange} required></textarea>
               </div>
-              <div className="form-group">
+              <div className="form-group" id='role'>
                 <label>Vous êtes ?</label>
                 <div>
+                <div className='role'>Client
                   <label>
                     <input
                       type="radio"
@@ -154,9 +155,11 @@ function App() {
                       checked={formData.role === 'Client'}
                       onChange={handleChange}
                     />
-                    Client
-                  </label>
+                    
+                  </label >
+                  </div>
                   <label>
+                  Vendeur
                     <input
                       type="radio"
                       name="role"
@@ -164,7 +167,7 @@ function App() {
                       checked={formData.role === 'Vendeur'}
                       onChange={handleChange}
                     />
-                    Vendeur
+                    
                   </label>
                 </div>
               </div>

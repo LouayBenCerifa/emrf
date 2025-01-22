@@ -6,7 +6,10 @@ body {
   background-color: #f3f4f6;
   color: #333;
 }
-
+#role{
+  align-items: center;
+  text-align: center;
+}
 .App {
   display: flex;
   flex-direction: column;
