@@ -7,6 +7,7 @@ import ClientPage from './ClientPage';
 import VendeurPage from './VendeurPage';
 import './App.css';
 import AdminPage from './AdminPage';
+import ProfilePage from './ProfilePage';
 
 function App() {
   const [isLogin, setIsLogin] = useState(true);
@@ -44,7 +45,6 @@ function App() {
       const usersRef = collection(db, 'users');
       const q = query(usersRef, where('email', '==', formData.email));
       const querySnapshot = await getDocs(q);
-
       if (!querySnapshot.empty) {
         const userData = querySnapshot.docs[0].data();
         if (userData.role === 'Client') {
@@ -189,6 +189,7 @@ function AppWithRouter() {
         <Route path="/" element={<App />} />
         <Route path="/client" element={<ClientPage />} />
         <Route path="/vendeur" element={<VendeurPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
@@ -196,4 +197,4 @@ function AppWithRouter() {
   );
 }
 
-export default AppWithRouter;
+export default AppWithRouter ;

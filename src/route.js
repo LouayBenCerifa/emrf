@@ -4,15 +4,15 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import App from './App';  // votre composant de connexion
 import HomePage from './acceuil';  // la nouvelle page d'accueil
 import { getAuth } from "firebase/auth";
-import vendeur from './Vendeur';
+
 // Composant pour protéger les routes
 const ProtectedRoute = ({ children }) => {
   const auth = getAuth();
   const user = auth.currentUser;
 
-
-    <Navigate to="/HomePage" />;
-
+  if (!user) {
+    return <Navigate to="/" />;
+  }
 
   return children;
 };
@@ -23,7 +23,7 @@ const RouterSetup = () => {
       <Routes>
         <Route path="/" element={<App />} />
         <Route 
-          path="/HomePage" 
+          path="/home" 
           element={
             <ProtectedRoute>
               <HomePage />
