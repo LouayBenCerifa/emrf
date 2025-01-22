@@ -18,9 +18,7 @@ const VendeurPage = () => {
   }
 
   const handleProfileClick = () => {
-    if (userData) {
-      setShowProfile(!showProfile);
-    }
+    setShowProfile(!showProfile);
   };
 
   const handleDisconnectClick = () => {
@@ -31,29 +29,23 @@ const VendeurPage = () => {
   return (
     <div style={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#f5f5f5', minHeight: '100vh', position: 'relative' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px', backgroundColor: '#007bff', color: '#ffffff' }}>
-        <h1 style={{ margin: 0 }}>eCommerce</h1>
+        <h1 style={{ margin: 0, marginLeft:'40%' }}>eCommerce</h1>
       </header>
 
-      <button 
-        onClick={handleProfileClick} 
+      <img 
+        src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" 
+        alt="Profil" 
+        onClick={handleProfileClick}
         style={{ 
           position: 'absolute', 
-          top: '20px', 
-          left: '20px', 
-          padding: '10px', 
-          backgroundColor: 'transparent', 
-          border: 'none', 
-          cursor: 'pointer', 
-          display: 'flex', 
-          alignItems: 'center' 
+          top: '1.5%', 
+          right: '20px',  
+          width: '40px', 
+          height: '40px', 
+          borderRadius: '50%', 
+          cursor: 'pointer' 
         }}
-      >
-        <img 
-          src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" 
-          alt="Profil" 
-          style={{ width: '30px', height: '30px', borderRadius: '50%' }}
-        />
-      </button>
+      />
 
       {showProfile && userData && (
         <div style={{ maxWidth: '600px', margin: '20px auto', padding: '20px', backgroundColor: '#ffffff', borderRadius: '10px', boxShadow: '0 6px 20px rgba(0, 0, 0, 0.1)' }}>
@@ -71,12 +63,11 @@ const VendeurPage = () => {
           </button>
         </div>
       )}
-
-      <main style={{ maxWidth: '800px', margin: '20px auto', padding: '20px', backgroundColor: '#ffffff', borderRadius: '10px', boxShadow: '0 6px 20px rgba(0, 0, 0, 0.1)' }}>
+      {!showProfile  && (<main style={{ maxWidth: '800px', margin: '20px auto', padding: '20px', backgroundColor: '#ffffff', borderRadius: '10px', boxShadow: '0 6px 20px rgba(0, 0, 0, 0.1)' }}>
         <h2>Bienvenue, {userData.nom} {userData.prenom}</h2>
         <p>Voici vos statistiques de vente :</p>
         {/* Ajoutez ici les composants ou les informations de statistiques */}
-      </main>
+      </main>)}
     </div>
   );
 };

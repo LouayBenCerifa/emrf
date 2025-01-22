@@ -59,14 +59,11 @@ function App() {
         localStorage.setItem('userData', JSON.stringify(Data));
         if (userData.role === 'Client') {
           navigate('/client');
-          module.exports = Data;
         } else if (userData.role === 'Vendeur') {
           navigate('/vendeur');
-          module.exports = Data;
         }
         else  if (userData.role === 'admin'){
           navigate('/Admin');
-          module.exports = Data;
         }
         
         
