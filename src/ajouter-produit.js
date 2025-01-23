@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db, addDoc, collection } from './firebase';
+import { db, addDoc, collection, getDocs, query, where } from './firebase';
 
 const AjouterProduit = () => {
   // Définir les hooks au début du composant
@@ -10,17 +10,33 @@ const AjouterProduit = () => {
   const [prix, setPrix] = useState('');
   const [quantite, setQuantite] = useState('');
   const [image, setImage] = useState(null);
-  const [imageUrl, setImageUrl] = useState('');  // Nouvel état pour l'URL de l'image
-  const vendeur = userData ? userData.vendeurid : '';  // Utilisation du nom du vendeur si userData est défini
+  const [imageUrl, setImageUrl] = useState('');
+  const [categories, setCategories] = useState([]); // Nouvel état pour les catégories
+  const [selectedCategory, setSelectedCategory] = useState(''); // Nouvel état pour la catégorie sélectionnée
+  const vendeur = userData ? userData.vendeurid : '';
   const navigate = useNavigate();
 
-  // Utiliser useEffect pour charger les données utilisateur
+  // Utiliser useEffect pour charger les données utilisateur et les catégories
   useEffect(() => {
     const storedUserData = localStorage.getItem('userData');
     if (storedUserData) {
       setUserData(JSON.parse(storedUserData));
       console.log('storedUserData:', JSON.parse(storedUserData));
     }
+
+    // Charger les catégories depuis Firestore
+    const getCategories = async () => {
+      const q = query(collection(db, 'categories'));
+      const querySnapshot = await getDocs(q);
+      const categoriesData = [];
+      querySnapshot.forEach((doc) => {
+        // Extraire le nom de la catégorie de l'ID du document
+        const nomCategorie = doc.id; // Assurez-vous que l'ID est le nom de la catégorie
+        categoriesData.push({ nom: nomCategorie, ...doc.data() });
+      });
+      setCategories(categoriesData);
+    };
+    getCategories();
   }, []);
 
   // Si les données de l'utilisateur ne sont pas encore disponibles, afficher un message de chargement
@@ -30,11 +46,10 @@ const AjouterProduit = () => {
 
   // Fonction pour gérer l'image et obtenir son URL localement
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
+     const file = e.target.files[0];
     if (file) {
-      // Crée une URL locale pour l'image sélectionnée
       setImage(file);
-      setImageUrl(URL.createObjectURL(file));  // Crée une URL locale pour l'aperçu de l'image
+      setImageUrl(URL.createObjectURL(file));
     }
   };
 
@@ -44,13 +59,13 @@ const AjouterProduit = () => {
 
     try {
       const nouveauProduit = {
-        vendeur:userData.uid,
+        vendeur: userData.uid,
         nomProduit,
         description,
         prix,
         quantite,
-        image: 'imageUrl',  // Utilise l'URL locale de l'image
-
+        image: imageUrl,  // Utilise l'URL de l'image
+        categorie: selectedCategory,  // Ajoute la catégorie sélectionnée
       };
 
       // Ajouter le produit à Firestore
@@ -130,6 +145,23 @@ const AjouterProduit = () => {
           />
         </div>
 
+        {/* Champ pour la sélection de la catégorie */}
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ display: 'block', marginBottom: '5px', color: '#333' }}>Catégorie :</label>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
+            required
+            aria-label="Catégorie du produit"
+          >
+            <option value="">Sélectionnez une catégorie</option>
+            {categories.map((category) => (
+              <option key={category.uid} value={category.uid}>{category.nom}</option>
+            ))}
+          </select>
+        </div>
+
         {/* Champ pour l'upload de l'image */}
         <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '5px', color: '#333' }}>Image du produit :</label>
@@ -144,7 +176,7 @@ const AjouterProduit = () => {
             <div style={{ marginTop: '10px', textAlign: 'center' }}>
               <img src={imageUrl} alt="Aperçu" style={{ maxWidth: '100%', height: 'auto', borderRadius: '5px' }} />
             </div>
-          )}
+ )}
         </div>
 
         {/* Bouton d'envoi */}
@@ -168,4 +200,4 @@ const AjouterProduit = () => {
   );
 };
 
-export default AjouterProduit;
+export default AjouterProduit; 

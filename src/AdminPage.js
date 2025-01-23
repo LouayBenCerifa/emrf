@@ -65,7 +65,7 @@ function AdminPage() {
       const productCount = productsSnapshot.size;
 
       const categoryData = {
-        'nom-cat': newCategory.trim(),
+        'nom': newCategory.trim(),
         'nbre-produits': productCount
       };
 
@@ -82,7 +82,7 @@ function AdminPage() {
 
   const handleEditCategory = async (category) => {
     setEditingCategory(category);
-    setNewCategory(category['nom-cat']);
+    setNewCategory(category['nom']);
   };
 
   const handleUpdateCategory = async () => {
@@ -90,7 +90,7 @@ function AdminPage() {
       try {
         const categoryDoc = doc(db, 'categories', editingCategory.id);
         await updateDoc(categoryDoc, {
-          'nom-cat': newCategory.trim()
+          'nom': newCategory.trim()
         });
         await fetchCategories();
         setEditingCategory(null);
@@ -111,6 +111,26 @@ function AdminPage() {
     }
   };
 
+  const handleBanUser  = async (userId) => {
+    try {
+      const userDoc = doc(db, 'users', userId);
+      await updateDoc(userDoc, { banned: true });
+      await fetchUsers();
+    } catch (error) {
+      console.error("Error banning user:", error);
+    }
+  };
+
+  const handleDeleteUser  = async (userId) => {
+    try {
+      const userDoc = doc(db, 'users', userId);
+      await deleteDoc(userDoc);
+      await fetchUsers();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    }
+  };
+
   useEffect(() => {
     if (showUsers) {
       fetchUsers();
@@ -126,8 +146,8 @@ function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="flex items-center mb-8">
-        <div className="mr-4"  >
-          <User  className="w-12 h-12 text-blue-600"  />
+        <div className="mr-4">
+          <User  className="w-12 h-12 text-blue-600" />
         </div>
         <h1 className="text-4xl font-bold text-gray-900">Bienvenue sur votre espace Admin</h1>
       </div>
@@ -153,6 +173,7 @@ function AdminPage() {
                     <th className="border p-3">Rôle</th>
                     <th className="border p-3">Adresse</th>
                     <th className="border p-3">Téléphone</th>
+                    <th className="border p-3">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -160,9 +181,23 @@ function AdminPage() {
                     <tr key={user.id} className="hover:bg-gray-200">
                       <td className="border p-3">{user.nom || 'N/A'}</td>
                       <td className="border p-3">{user.prenom || 'N/A'}</td>
-                      <td className="border p-3">{user.role || 'N/A'}</td>
+                      <td className="border p-3">{user.role || 'N /A'}</td>
                       <td className="border p-3">{user.adresse || 'N/A'}</td>
                       <td className="border p-3">{user.tel || 'N/A'}</td>
+                      <td className="border p-3 flex space-x-2">
+                        <button 
+                          onClick={() => handleBanUser (user.id)}
+                          className="text-yellow-600 hover:text-yellow-800"
+                        >
+                          Bannir
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteUser (user.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          Supprimer
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -250,13 +285,13 @@ function AdminPage() {
                   <tr className="bg-gray-300">
                     <th className="border p-3">Nom</th>
                     <th className="border p-3">Nombre de Produits</th>
-                    <th className="border p-3">Actions</th>
+                    < th className="border p-3">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {categories.map((category) => (
                     <tr key={category.id} className="hover:bg-gray-200">
-                      <td className="border p-3">{category['nom-cat']}</td>
+                      <td className="border p-3">{category['nom']}</td>
                       <td className="border p-3">{category['nbre-produits']}</td>
                       <td className="border p-3 flex space-x-2">
                         <button 
