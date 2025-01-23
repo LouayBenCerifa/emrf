@@ -11,7 +11,7 @@ const AjouterProduit = () => {
   const [quantite, setQuantite] = useState('');
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState('');  // Nouvel état pour l'URL de l'image
-  const vendeur = userData ? userData.nom : '';  // Utilisation du nom du vendeur si userData est défini
+  const vendeur = userData ? userData.vendeurid : '';  // Utilisation du nom du vendeur si userData est défini
   const navigate = useNavigate();
 
   // Utiliser useEffect pour charger les données utilisateur
@@ -19,6 +19,7 @@ const AjouterProduit = () => {
     const storedUserData = localStorage.getItem('userData');
     if (storedUserData) {
       setUserData(JSON.parse(storedUserData));
+      console.log('storedUserData:', JSON.parse(storedUserData));
     }
   }, []);
 
@@ -43,12 +44,13 @@ const AjouterProduit = () => {
 
     try {
       const nouveauProduit = {
-        vendeur,
+        vendeur:userData.uid,
         nomProduit,
         description,
         prix,
         quantite,
-        image: imageUrl,  // Utilise l'URL locale de l'image
+        image: 'imageUrl',  // Utilise l'URL locale de l'image
+
       };
 
       // Ajouter le produit à Firestore

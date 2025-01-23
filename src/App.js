@@ -42,7 +42,8 @@ function App() {
 
     const auth = getAuth();
     try {
-      await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      const userid = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      console.log('Connexion réussie:', userid);
       setMessage({ text: 'Connexion réussie!', type: 'success' });
       const usersRef = collection(db, 'users');
       const q = query(usersRef, where('email', '==', formData.email));
@@ -57,8 +58,10 @@ function App() {
           email:userData.email,
           tel:userData.tel,
           adresse:userData.adresse,
+          uid:userid.user.uid,
         }
         localStorage.setItem('userData', JSON.stringify(Data));
+        console.log(Data);
         if (userData.role === 'Client') {
           navigate('/client');
         } else if (userData.role === 'Vendeur') {
@@ -207,7 +210,7 @@ function AppWithRouter() {
         <Route path="/modifier le produit" element={<ModifierProduitPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="*" element={<Navigate to="/" />} />
-        <Route path="/modifier-produit/:id" element={<ModifierProduitPage />} /> {/* Route pour la modification */}
+        <Route path="/modifier-Produit/:id" element={<ModifierProduitPage />} /> {/* Route pour la modification */}
       </Routes>
     </Router>
   );

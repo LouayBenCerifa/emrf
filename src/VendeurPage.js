@@ -33,7 +33,7 @@ const VendeurPage = () => {
     const fetchProduits = async () => {
       if (userData) {
         const produitsRef = collection(db, 'produits');
-        const q = query(produitsRef, where('vendeur', '==', userData.nom));
+        const q = query(produitsRef, where('vendeur', '==', userData.uid));
         const querySnapshot = await getDocs(q);
         const produitsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setProduits(produitsList);
@@ -71,6 +71,7 @@ const VendeurPage = () => {
         description: editProductData.description,
         prix: editProductData.prix,
         image: editProductData.image,
+        vendeur: userData.uid, // Assurer que le produit est associé au vendeur actuel
       });
       // Mettre à jour la liste des produits localement
       setProduits(produits.map((produit) =>
@@ -87,6 +88,7 @@ const VendeurPage = () => {
   // Fonction pour afficher/masquer le formulaire d'ajout de produit
   const handleAddProductClick = () => {
     setShowAddProductForm(true);
+    navigate('/ajouter-produit')
   };
 
   // Fonction pour ajouter un produit
