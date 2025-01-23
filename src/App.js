@@ -9,6 +9,7 @@ import './App.css';
 import AdminPage from './AdminPage';
 import ProfilePage from './ProfilePage';
 import AjouterProduit from './ajouter-produit';
+import ModifierProduitPage from './ModifierProduitPage';
 
 function App() {
   const [isLogin, setIsLogin] = useState(true);
@@ -203,8 +204,10 @@ function AppWithRouter() {
         <Route path="/ajouter-produit" element={<AjouterProduit />} />
         <Route path="/vendeur" element={<VendeurPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/modifier le produit" element={<ModifierProduitPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="*" element={<Navigate to="/" />} />
+        <Route path="/modifier-produit/:id" element={<ModifierProduitPage />} /> {/* Route pour la modification */}
       </Routes>
     </Router>
   );
