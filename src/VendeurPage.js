@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db } from './firebase';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBox, faUser, faPlus, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import './VendeurPage.css'; // We'll create this CSS file
 
 const VendeurPage = () => {
   const [userData, setUserData] = useState(null);
   const [produits, setProduits] = useState([]);
-  const [activeSection, setActiveSection] = useState('produits');
+  const [activeSection, setActiveSection] = useState('dashboard');
   const [showConfirmDelete, setShowConfirmDelete] = useState(null);
   const navigate = useNavigate();
 
@@ -17,17 +16,15 @@ const VendeurPage = () => {
     if (storedUserData) {
       const parsedUserData = JSON.parse(storedUserData);
       setUserData(parsedUserData);
-
-      // Fetch products as soon as userData is available
-      if (parsedUserData.uid) {
-        fetchProduits(parsedUserData.uid);
-      }
+      fetchProduits(parsedUserData.uid);
+    } else {
+      navigate('/login');
     }
-  }, []);
+  }, [navigate]);
 
   const fetchProduits = async (uid) => {
     try {
-      const produitsRef = collection(db, 'produits'); // Collection Firestore
+      const produitsRef = collection(db, 'produits');
       const q = query(produitsRef, where('vendeur', '==', uid));
       const querySnapshot = await getDocs(q);
       const fetchedProduits = querySnapshot.docs.map(doc => ({
@@ -42,16 +39,12 @@ const VendeurPage = () => {
 
   const handleDisconnect = () => {
     localStorage.removeItem('userData');
-    navigate('/login');
-  };
-
-  const confirmDelete = (id) => {
-    setShowConfirmDelete(id);
+    navigate('/App');
   };
 
   const deleteProduit = async (id) => {
     try {
-      // Code pour supprimer le produit de la base de données
+      await deleteDoc(doc(db, 'produits', id));
       setProduits(produits.filter(produit => produit.id !== id));
       setShowConfirmDelete(null);
     } catch (error) {
@@ -59,195 +52,182 @@ const VendeurPage = () => {
     }
   };
 
-  const styles = {
-    container: {
-      display: 'flex',
-      fontFamily: 'Arial, sans-serif',
-      minHeight: '100vh',
-    },
-    sidebar: {
-      width: '250px',
-      backgroundColor: '#2c3e50',
-      color: 'white',
-      padding: '20px',
-    },
-    sidebarMenu: {
-      listStyle: 'none',
-      padding: 0,
-    },
-    sidebarItem: {
-      display: 'flex',
-      alignItems: 'center',
-      padding: '10px',
-      cursor: 'pointer',
-      borderRadius: '5px',
-      margin: '10px 0',
-      backgroundColor: '#34495e',
-    },
-    activeSidebarItem: {
-      backgroundColor: '#1abc9c',
-    },
-    icon: {
-      marginRight: '10px',
-    },
-    mainContent: {
-      flex: 1,
-      padding: '20px',
-      backgroundColor: '#ecf0f1',
-    },
-    productGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-      gap: '20px',
-    },
-    productCard: {
-      backgroundColor: 'white',
-      border: '1px solid #ddd',
-      borderRadius: '8px',
-      padding: '15px',
-      textAlign: 'center',
-    },
-    productImage: {
-      width: '100%',
-      height: '200px',
-      objectFit: 'cover',
-      borderRadius: '8px',
-    },
-    actionButtons: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      marginTop: '10px',
-    },
-    button: {
-      padding: '8px 15px',
-      border: 'none',
-      borderRadius: '4px',
-      cursor: 'pointer',
-    },
-    editButton: {
-      backgroundColor: '#3498db',
-      color: 'white',
-    },
-    deleteButton: {
-      backgroundColor: '#e74c3c',
-      color: 'white',
-    },
-    confirmDeleteOverlay: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    confirmDeleteBox: {
-      backgroundColor: 'white',
-      padding: '20px',
-      borderRadius: '8px',
-      textAlign: 'center',
-    },
+  const renderDashboard = () => {
+    if (!userData) return null;
+
+    return (
+      <div className="dashboard-container">
+        <div className="dashboard-card">
+          <h3>Statistiques Produits</h3>
+          <div className="dashboard-stats">
+            <p>Total Produits: {produits.length}</p>
+            
+          </div>
+        </div>
+        <div className="dashboard-card">
+          <h3>Profil Vendeur</h3>
+          <div className="dashboard-profile">
+            <p>{userData?.nom || 'Nom non disponible'}</p>
+            <p>{userData?.email || 'Email non disponible'}</p>
+            <p>{userData?.tel || 'Téléphone non renseigné'}</p>
+          </div>
+        </div>
+        <div className="dashboard-card">
+          <h3>Actions Rapides</h3>
+          <div className="dashboard-actions">
+            <button onClick={() => navigate('/ajouter-produit')}>
+              Ajouter Produit
+            </button>
+            <button onClick={() => setActiveSection('produits')}>
+              Gérer Produits
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
-  return (
-    <div style={styles.container}>
-      <div style={styles.sidebar}>
-        <h2>Menu Vendeur</h2>
-        <ul style={styles.sidebarMenu}>
-          <li 
-            style={{ 
-              ...styles.sidebarItem, 
-              ...(activeSection === 'produits' ? styles.activeSidebarItem : {})
-            }}
-            onClick={() => {
-              setActiveSection('produits');
-              fetchProduits(userData.uid);
-            }}
-          >
-            <FontAwesomeIcon icon={faBox} style={styles.icon} /> Mes Produits
-          </li>
-          <li 
-            style={{ 
-              ...styles.sidebarItem, 
-              ...(activeSection === 'profil' ? styles.activeSidebarItem : {})
-            }}
-            onClick={() => setActiveSection('profil')}
-          >
-            <FontAwesomeIcon icon={faUser} style={styles.icon} /> Mon Profil
-          </li>
-          <li 
-            style={styles.sidebarItem}
-            onClick={() => navigate('/ajouter-produit')}
-          >
-            <FontAwesomeIcon icon={faPlus} style={styles.icon} /> Ajouter Produit
-          </li>
-          <li 
-            style={styles.sidebarItem}
-            onClick={handleDisconnect}
-          >
-            <FontAwesomeIcon icon={faSignOutAlt} style={styles.icon} /> Déconnexion
-          </li>
-        </ul>
-      </div>
-
-      <div style={styles.mainContent}>
-        {activeSection === 'produits' && (
-          <div style={styles.productGrid}>
-            {produits.map(produit => (
-              <div key={produit.id} style={styles.productCard}>
-                <img 
-                  src={produit.image} 
-                  alt={produit.nom} 
-                  style={styles.productImage} 
-                />
-                <h3>{produit.nom}</h3>
-                <p>{produit.description}</p>
-                <div style={styles.actionButtons}>
-                  <span>{produit.prix} €</span>
-                  <div>
-                    <button 
-                      style={{...styles.button, ...styles.editButton}}
-                    >
-                      Modifier
-                    </button>
-                    <button 
-                      style={{...styles.button, ...styles.deleteButton, marginLeft: '10px'}}
-                      onClick={() => confirmDelete(produit.id)}
-                    >
-                      Supprimer
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-                {showConfirmDelete && (
-                  <div style={styles.confirmDeleteOverlay}>
-                    <div style={styles.confirmDeleteBox}>
-                      <p>Êtes-vous sûr de vouloir supprimer ce produit ?</p>
-                      <button 
-                        style={{...styles.button, ...styles.deleteButton, marginRight: '10px'}}
-                        onClick={() => deleteProduit(showConfirmDelete)}
-                      >
-                        Oui, supprimer
-                      </button>
-                      <button 
-                        style={{...styles.button, backgroundColor: '#bdc3c7'}}
-                        onClick={() => setShowConfirmDelete(false)}
-                      >
-                        Annuler
-                      </button>
-                    </div>
-                  </div>
-                )}
+  const renderProduits = () => (
+    <div className="produits-grid">
+      {produits.map(produit => (
+        <div key={produit.id} className="produit-card">
+          <img 
+            src={produit.image} 
+            alt={produit.nom} 
+            className="produit-image"
+          />
+          <div className="produit-details">
+            
+            <p>description: {produit.description}</p>
+            <p>Prix: {produit.prix} </p>
+            <div className="produit-footer">
+              
+              <div className="produit-actions">
+                <button 
+                  className="btn-edit"
+                  onClick={() => navigate(`/modifier-produit/${produit.id}`)}
+                >
+                  Modifier
+                </button>
+                <button 
+                  className="btn-delete"
+                  onClick={() => setShowConfirmDelete(produit.id)}
+                >
+                  Supprimer
+                </button>
               </div>
             </div>
-          );
-        };
-        
-        export default VendeurPage;
-        
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderProfil = () => {
+    if (!userData) return null;
+
+    return (
+      <div className="profile-container">
+        <h2>Mon Profil</h2>
+        <div className="profile-grid">
+          <div className="profile-field">
+            <label>Nom Complet</label>
+            <input 
+              type="text" 
+              value={userData.nom || ''} 
+              readOnly 
+            />
+          </div>
+          <div className="profile-field">
+            <label>Email</label>
+            <input 
+              type="email" 
+              value={userData.email || ''} 
+              readOnly 
+            />
+          </div>
+          <div className="profile-field">
+            <label>Téléphone</label>
+            <input 
+              type="tel" 
+              value={userData.tel || 'Non renseigné'} 
+              readOnly 
+            />
+          </div>
+          <div className="profile-field">
+            <label>Adresse</label>
+            <input 
+              type="text" 
+              value={userData.adresse || 'Non renseigné'} 
+              readOnly 
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const sidebarItems = [
+    { label: 'Tableau de Bord', section: 'dashboard' },
+    { label: 'Mes Produits', section: 'produits' },
+    { label: 'Mon Profil', section: 'profil' },
+    { label: 'Ajouter Produit', action: () => navigate('/ajouter-produit') },
+    { label: 'Déconnexion', action: handleDisconnect }
+  ];
+
+  if (!userData) {
+    return <div>Chargement...</div>;
+  }
+
+  return (
+    <div className="vendor-page">
+      <div className="sidebar">
+        <div className="sidebar-header">
+          <h2>Vendeur</h2>
+        </div>
+        <nav className="sidebar-nav">
+          {sidebarItems.map((item, index) => (
+            <button
+              key={index}
+              onClick={item.action || (() => setActiveSection(item.section))}
+              className={activeSection === item.section ? 'active' : ''}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
+      </div>
+      
+      <main className="main-content">
+        {activeSection === 'dashboard' && renderDashboard()}
+        {activeSection === 'produits' && renderProduits()}
+        {activeSection === 'profil' && renderProfil()}
+      </main>
+
+      {showConfirmDelete && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Confirmation</h3>
+            <p>Voulez-vous vraiment supprimer ce produit ?</p>
+            <div className="modal-actions">
+              <button 
+                className="btn-cancel"
+                onClick={() => setShowConfirmDelete(null)}
+              >
+                Annuler
+              </button>
+              <button 
+                className="btn-confirm"
+                onClick={() => deleteProduit(showConfirmDelete)}
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default VendeurPage;
