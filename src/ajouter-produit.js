@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db, addDoc, collection, getDocs, query } from './firebase';
-
 const AjouterProduit = () => {
   const [userData, setUserData] = useState(null);
   const [nomProduit, setNomProduit] = useState('');
