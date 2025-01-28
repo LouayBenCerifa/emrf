@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { User, Menu, ShoppingCart } from 'lucide-react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from './firebase';
+import { Link } from 'react-router-dom'; // Importation de Link pour la navigation
 import './ClientPage.css';
+import AjouterProduit from './ajouter-produit';
 
 const ClientPage = () => {
   const [categories, setCategories] = useState([]);
@@ -78,15 +80,18 @@ const ClientPage = () => {
       <div className="main-content">
         <header className="top-navbar">
           <div className="nav-actions">
-            <button 
+            <button
               className="profile-button"
               onClick={() => alert('Connexion')}
             >
               <User className="icon" />
             </button>
-            <button className="cart-button">
-              <ShoppingCart className="icon" />
-            </button>
+            {/* Lien vers la page du panier */}
+            <Link to="/CartPage">
+              <button className="cart-button">
+                <ShoppingCart className="icon" />
+              </button>
+            </Link>
           </div>
         </header>
 
@@ -105,7 +110,7 @@ const ClientPage = () => {
                 <h3 className="product-name">{product.nom}</h3>
                 <p className="product-description">{product.description}</p>
                 <p className="product-price">{product.prix} €</p>
-                <button className="add-to-cart-btn">
+                <button className="add-to-cart-btn" onClick={() => AjouterProduit(product)}>
                   Ajouter au panier
                 </button>
               </div>

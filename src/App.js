@@ -10,6 +10,7 @@ import AdminPage from './AdminPage';
 import ProfilePage from './ProfilePage';
 import AjouterProduit from './ajouter-produit';
 import ModifierProduitPage from './ModifierProduitPage';
+import CartPage from './CartPage';
 
 function App() {
   const [isLogin, setIsLogin] = useState(true);
@@ -207,6 +208,7 @@ function AppWithRouter() {
         <Route path="/ajouter-produit" element={<AjouterProduit />} />
         <Route path="/vendeur" element={<VendeurPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/CartPage" element={<CartPage />} />
         <Route path="/modifier le produit" element={<ModifierProduitPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="*" element={<Navigate to="/" />} />
