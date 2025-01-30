@@ -70,6 +70,7 @@ const ClientPage = () => {
         id: product.id,
         nom: product.nom || '',
         prix: product.prix || 0,
+        idVendeur: product.vendeur || '',
         image: product.image || '',
         description: product.description || ''
       });

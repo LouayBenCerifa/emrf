@@ -29,6 +29,7 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     try {
       localStorage.setItem('cart', JSON.stringify(cartItems));
+      console.log(cartItems);
     } catch (error) {
       console.error('Erreur lors de la sauvegarde dans localStorage:', error);
     }

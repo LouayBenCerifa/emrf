@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useCart } from './CartContext';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trash2, Plus, Minus } from 'lucide-react';
+import { db } from './firebase';
+import { collection, addDoc } from 'firebase/firestore';
 import './CartPage.css';
 
 const CartPage = () => {
@@ -13,6 +15,54 @@ const CartPage = () => {
     clearCart 
   } = useCart();
   const navigate = useNavigate();
+  const [showDeliveryOptions, setShowDeliveryOptions] = useState(false);
+  const [deliveryMethod, setDeliveryMethod] = useState('');
+  const [customerInfo, setCustomerInfo] = useState({ nom: '', prenom: '', adresse: '' });
+
+  const handleInputChange = (e) => {
+    setCustomerInfo({ ...customerInfo, [e.target.name]: e.target.value });
+  };
+
+  const handleOrderSubmit = async () => {
+  if (deliveryMethod === 'home' && (!customerInfo.nom || !customerInfo.prenom || !customerInfo.adresse)) {
+    alert('Veuillez remplir tous les champs requis');
+    return;
+  }
+
+  if (!cartItems.length) {
+    alert("Votre panier est vide !");
+    return;
+  }
+
+  console.log("Commande envoyée : ", cartItems); // Debugging
+
+  try {
+    console.log("Commande envoyée : ", cartItems); // Debugging
+    await addDoc(collection(db, 'commandes'), {
+      produits: cartItems.map(item => ({
+        id: item.id || 'id-inconnu',
+        nom: item.nom || 'nom-inconnu',
+        quantite: item.quantity || 1,
+        vendeurId: item.idVendeur || 'inconnu',
+      })),
+      total: getTotalPrice(),
+      modeLivraison: deliveryMethod || 'non-spécifié',
+      client: {
+        nom: customerInfo.nom || 'nom-inconnu',
+        prenom: customerInfo.prenom || 'prenom-inconnu',
+        adresse: customerInfo.adresse || 'adresse-inconnue',
+      },
+      dateCommande: new Date().toISOString()
+    });
+
+    clearCart();
+    alert('Commande passée avec succès !');
+    navigate('/client');
+  } catch (error) {
+    console.error('Erreur lors de la commande :', error);
+    alert('Une erreur est survenue lors de la commande.');
+  }
+};
 
   if (cartItems.length === 0) {
     return (
@@ -80,7 +130,10 @@ const CartPage = () => {
           <span>Total:</span>
           <span className="total-price">{getTotalPrice().toFixed(2)} €</span>
         </div>
-        <button className="checkout-button">
+        <button 
+          className="checkout-button"
+          onClick={() => setShowDeliveryOptions(true)}
+        >
           Procéder au paiement
         </button>
         <button 
@@ -90,6 +143,29 @@ const CartPage = () => {
           Continuer vos achats
         </button>
       </div>
+
+      {showDeliveryOptions && (
+        <div className="delivery-options">
+          <h3>Choisissez votre mode de livraison :</h3>
+          <label>
+            <input type="radio" name="delivery" value="home" onChange={(e) => setDeliveryMethod(e.target.value)} />
+            Livraison à domicile
+          </label>
+          <label>
+            <input type="radio" name="delivery" value="store" onChange={(e) => setDeliveryMethod(e.target.value)} />
+            Retrait en magasin
+          </label>
+
+          {deliveryMethod === 'home' && (
+            <div className="customer-info-form">
+              <input type="text" name="nom" placeholder="Nom" value={customerInfo.nom} onChange={handleInputChange} />
+              <input type="text" name="prenom" placeholder="Prénom" value={customerInfo.prenom} onChange={handleInputChange} />
+              <input type="text" name="adresse" placeholder="Adresse" value={customerInfo.adresse} onChange={handleInputChange} />
+            </div>
+          )}
+          <button className="confirm-delivery" onClick={handleOrderSubmit}>Confirmer</button>
+        </div>
+      )}
     </div>
   );
 };
