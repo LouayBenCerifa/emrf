@@ -26,8 +26,9 @@
   }
   
   .menu-icon {
-    position:absolute;
+    position:relative;
     text-align: center;
+    justify-content: center;
     color: #666;
   }
   
@@ -73,6 +74,7 @@
   
   .profile-button, 
   .cart-button {
+    color: #666;
     background: white;
     border: none;
     border-radius: 50%;
