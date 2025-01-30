@@ -11,7 +11,9 @@ import AjouterProduit from './ajouter-produit';
 import ModifierProduitPage from './ModifierProduitPage';
 import ClientPage from './ClientPage';
 import CartPage from './CartPage';
-import { CartProvider } from './CartContext';
+
+import { CartProvider } from './CartContext'; // Assurez-vous d'importer CartProvider
+
 
 function App() {
   const [isLogin, setIsLogin] = useState(true);
@@ -202,21 +204,23 @@ function App() {
 
 function AppWithRouter() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/client" element={<ClientPage />} />
-        <Route path="/ajouter-produit" element={<AjouterProduit />} />
-        <Route path="/vendeur" element={<VendeurPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/CartPage" element={<CartPage />} />
-        <Route path="/modifier le produit" element={<ModifierProduitPage />} />
-        <Route path="/admin" element={<AdminPage />} />
-        <Route path="*" element={<Navigate to="/" />} />
-        <Route path="/modifier-Produit/:id" element={<ModifierProduitPage />} /> {/* Route pour la modification */}
-      </Routes>
+<Router>
+      <CartProvider> {/* Envelopper toutes les routes avec CartProvider */}
+        <Routes>
+          <Route path="/" element={<App />} />
+          <Route path="/client" element={<ClientPage />} />
+          <Route path="/ajouter-produit" element={<AjouterProduit />} />
+          <Route path="/vendeur" element={<VendeurPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/CartPage" element={<CartPage />} />
+          <Route path="/modifier le produit" element={<ModifierProduitPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="/modifier-Produit/:id" element={<ModifierProduitPage />} />
+        </Routes>
+      </CartProvider>
     </Router>
   );
 }
 
-export default AppWithRouter ;
+export default AppWithRouter;

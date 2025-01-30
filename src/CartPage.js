@@ -1,81 +1,93 @@
 import React from 'react';
 import { useCart } from './CartContext';
-import { Trash2, Plus, Minus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Trash2, Plus, Minus } from 'lucide-react';
+import './CartPage.css';
 
 const CartPage = () => {
-  const { cartItems, removeFromCart, updateQuantity, getTotalPrice } = useCart();
+  const { 
+    cartItems, 
+    removeFromCart, 
+    updateQuantity, 
+    getTotalPrice,
+    clearCart 
+  } = useCart();
+  const navigate = useNavigate();
 
   if (cartItems.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <h2 className="text-2xl font-bold mb-4">Votre panier est vide</h2>
-        <Link to="/AdminPage" className="text-blue-600 hover:text-blue-800">
-          Retourner à la boutique
-        </Link>
+      <div className="empty-cart-container">
+        <h2>Votre panier est vide</h2>
+        <button 
+          className="continue-shopping-btn"
+          onClick={() => navigate('/client')}
+        >
+          Continuer vos achats
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Votre Panier</h1>
-      
-      <div className="space-y-4">
+    <div className="cart-container">
+      <div className="cart-header">
+        <button 
+          className="back-button"
+          onClick={() => navigate('/client')}
+        >
+          <ArrowLeft className="icon" />
+          Retour aux achats
+        </button>
+        <h2>Votre Panier</h2>
+      </div>
+
+      <div className="cart-items">
         {cartItems.map((item) => (
-          <div key={item.id} className="flex items-center border p-4 rounded-lg shadow">
-            <img 
-              src={item.image} 
-              alt={item.nom} 
-              className="w-24 h-24 object-cover rounded"
-            />
-            
-            <div className="flex-grow ml-4">
-              <h3 className="font-semibold">{item.nom}</h3>
-              <p className="text-gray-600">{item.prix} € par unité</p>
+          <div key={item.id} className="cart-item">
+            <div className="cart-item-image">
+              <img src={item.image} alt={item.nom} />
             </div>
-            
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                className="p-1 rounded hover:bg-gray-100"
-              >
-                <Minus size={20} />
-              </button>
-              
-              <span className="mx-2">{item.quantity}</span>
-              
-              <button
-                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                className="p-1 rounded hover:bg-gray-100"
-              >
-                <Plus size={20} />
-              </button>
+            <div className="cart-item-info">
+              <h3>{item.nom}</h3>
+              <p className="item-price">{item.prix} €</p>
+              <div className="quantity-controls">
+                <button 
+                  onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                  disabled={item.quantity <= 1}
+                >
+                  <Minus size={16} />
+                </button>
+                <span>{item.quantity}</span>
+                <button 
+                  onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
             </div>
-            
-            <div className="ml-4">
-              <p className="font-semibold">{(item.prix * item.quantity).toFixed(2)} €</p>
-            </div>
-            
-            <button
+            <button 
+              className="remove-item"
               onClick={() => removeFromCart(item.id)}
-              className="ml-4 p-2 text-red-600 hover:text-red-800"
             >
-              <Trash2 size={20} />
+              <Trash2 size={16} />
             </button>
           </div>
         ))}
       </div>
-      
-      <div className="mt-6 text-right">
-        <div className="text-xl font-bold">
-          Total: {getTotalPrice().toFixed(2)} €
+
+      <div className="cart-summary">
+        <div className="summary-row">
+          <span>Total:</span>
+          <span className="total-price">{getTotalPrice().toFixed(2)} €</span>
         </div>
+        <button className="checkout-button">
+          Procéder au paiement
+        </button>
         <button 
-          className="mt-4 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
-          onClick={() => alert('Passer à la commande')}
+          className="continue-shopping"
+          onClick={() => navigate('/client')}
         >
-          Passer la commande
+          Continuer vos achats
         </button>
       </div>
     </div>
