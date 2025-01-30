@@ -13,7 +13,6 @@ const ClientPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
-
   useEffect(() => {
     const fetchCategories = async () => {
       try {
