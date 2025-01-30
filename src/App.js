@@ -3,14 +3,15 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'r
 import { collection, query, where, getDocs, setDoc, doc } from 'firebase/firestore';
 import { db } from './firebase';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import ClientPage from './ClientPage';
 import VendeurPage from './VendeurPage';
 import './App.css';
 import AdminPage from './AdminPage';
 import ProfilePage from './ProfilePage';
 import AjouterProduit from './ajouter-produit';
 import ModifierProduitPage from './ModifierProduitPage';
+import ClientPage from './ClientPage';
 import CartPage from './CartPage';
+import { CartProvider } from './CartContext';
 
 function App() {
   const [isLogin, setIsLogin] = useState(true);

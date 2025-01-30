@@ -1,118 +1,85 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Card, CardContent, Typography, Divider } from '@mui/material';
-import { Trash2 } from 'lucide-react';
-import './CartPage.css';
+import React from 'react';
+import { useCart } from './CartContext';
+import { Trash2, Plus, Minus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-function CartPage() {
-  const [cartItems, setCartItems] = useState([]);
-  const [total, setTotal] = useState(0);
+const CartPage = () => {
+  const { cartItems, removeFromCart, updateQuantity, getTotalPrice } = useCart();
 
-  // Simule la récupération des articles dans le panier (ici, ils sont stockés dans localStorage)
-  useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem('cart')) || [];
-    setCartItems(storedCart);
-    calculateTotal(storedCart);
-  }, []);
-
-  // Calcule le total du panier
-  const calculateTotal = (items) => {
-    const totalAmount = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    setTotal(totalAmount);
-  };
-
-  // Supprimer un article du panier
-  const handleRemoveItem = (id) => {
-    const updatedCart = cartItems.filter(item => item.id !== id);
-    setCartItems(updatedCart);
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
-    calculateTotal(updatedCart);
-  };
-
-  // Mettre à jour la quantité d'un article dans le panier
-  const handleUpdateQuantity = (id, quantity) => {
-    const updatedCart = cartItems.map(item => {
-      if (item.id === id) {
-        return { ...item, quantity };
-      }
-      return item;
-    });
-    setCartItems(updatedCart);
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
-    calculateTotal(updatedCart);
-  };
-
-  // Simuler le processus de paiement
-  const handleCheckout = () => {
-    alert('Checkout process simulated. Your total is: $' + total);
-    // Implémentez ici la logique de paiement (Stripe, PayPal, etc.)
-  };
+  if (cartItems.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <h2 className="text-2xl font-bold mb-4">Votre panier est vide</h2>
+        <Link to="/AdminPage" className="text-blue-600 hover:text-blue-800">
+          Retourner à la boutique
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <div className="cart-container">
-      <h2>Your Shopping Cart</h2>
-      <div className="cart-items">
-        {cartItems.length === 0 ? (
-          <Typography variant="h6" color="textSecondary">
-            Your cart is empty.
-          </Typography>
-        ) : (
-          cartItems.map(item => (
-            <Card key={item.id} className="cart-item">
-              <CardContent>
-                <div className="cart-item-info">
-                  <Typography variant="h6">{item.name}</Typography>
-                  <Typography variant="body2">Price: ${item.price}</Typography>
-                  <div className="cart-item-actions">
-                    <Button
-                      variant="outlined"
-                      onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                      disabled={item.quantity <= 1}
-                    >
-                      -
-                    </Button>
-                    <Typography>{item.quantity}</Typography>
-                    <Button
-                      variant="outlined"
-                      onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                    >
-                      +
-                    </Button>
-                    <Button onClick={() => handleRemoveItem(item.id)}>
-                      <Trash2 />
-                    </Button>
-                  </div>
-                </div>
-                <Divider />
-                <div className="cart-item-total">
-                  <Typography variant="body2">Subtotal: ${item.price * item.quantity}</Typography>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
-
-      {/* Cart Summary */}
-      {cartItems.length > 0 && (
-        <div className="cart-summary">
-          <Card className="cart-summary-card">
-            <CardContent>
-              <Typography variant="h6">Total</Typography>
-              <Typography variant="h5">${total}</Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleCheckout}
-                className="checkout-button"
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-6">Votre Panier</h1>
+      
+      <div className="space-y-4">
+        {cartItems.map((item) => (
+          <div key={item.id} className="flex items-center border p-4 rounded-lg shadow">
+            <img 
+              src={item.image} 
+              alt={item.nom} 
+              className="w-24 h-24 object-cover rounded"
+            />
+            
+            <div className="flex-grow ml-4">
+              <h3 className="font-semibold">{item.nom}</h3>
+              <p className="text-gray-600">{item.prix} € par unité</p>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                className="p-1 rounded hover:bg-gray-100"
               >
-                Checkout
-              </Button>
-            </CardContent>
-          </Card>
+                <Minus size={20} />
+              </button>
+              
+              <span className="mx-2">{item.quantity}</span>
+              
+              <button
+                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                className="p-1 rounded hover:bg-gray-100"
+              >
+                <Plus size={20} />
+              </button>
+            </div>
+            
+            <div className="ml-4">
+              <p className="font-semibold">{(item.prix * item.quantity).toFixed(2)} €</p>
+            </div>
+            
+            <button
+              onClick={() => removeFromCart(item.id)}
+              className="ml-4 p-2 text-red-600 hover:text-red-800"
+            >
+              <Trash2 size={20} />
+            </button>
+          </div>
+        ))}
+      </div>
+      
+      <div className="mt-6 text-right">
+        <div className="text-xl font-bold">
+          Total: {getTotalPrice().toFixed(2)} €
         </div>
-      )}
+        <button 
+          className="mt-4 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+          onClick={() => alert('Passer à la commande')}
+        >
+          Passer la commande
+        </button>
+      </div>
     </div>
   );
-}
+};
 
 export default CartPage;

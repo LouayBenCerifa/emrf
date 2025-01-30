@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { User, Menu, ShoppingCart } from 'lucide-react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from './firebase';
-import { Link } from 'react-router-dom'; // Importation de Link pour la navigation
+import { Link } from 'react-router-dom';
+import { useCart } from './CartContext';
 import './ClientPage.css';
-import AjouterProduit from './ajouter-produit';
 
 const ClientPage = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(true );
+  const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -55,6 +56,10 @@ const ClientPage = () => {
     return <div>Chargement des catégories...</div>;
   }
 
+  const handleAddToCart = (product) => {
+    addToCart(product);
+    alert('Produit ajouté au panier');
+  };
   return (
     <div className="ecommerce-container">
       <div className={`sidebar ${isMenuOpen ? 'open' : 'closed'}`}>
@@ -86,7 +91,6 @@ const ClientPage = () => {
             >
               <User className="icon" />
             </button>
-            {/* Lien vers la page du panier */}
             <Link to="/CartPage">
               <button className="cart-button">
                 <ShoppingCart className="icon" />
@@ -110,7 +114,10 @@ const ClientPage = () => {
                 <h3 className="product-name">{product.nom}</h3>
                 <p className="product-description">{product.description}</p>
                 <p className="product-price">{product.prix} €</p>
-                <button className="add-to-cart-btn" onClick={() => AjouterProduit(product)}>
+                <button 
+                  className="add-to-cart-btn" 
+                  onClick={() => handleAddToCart(product)}
+                >
                   Ajouter au panier
                 </button>
               </div>
