@@ -187,7 +187,7 @@ const ClientPage = () => {
                     />
                   </div>
                   <div className="product-details">
-                    <h3 className="product-name">{product.nom || 'Sans nom'}</h3>
+                    <h3 className="product-name">{product.nomProduit || 'Sans nom'}</h3>
                     <p className="product-description">
                       {product.description || 'Aucune description disponible'}
                     </p>
