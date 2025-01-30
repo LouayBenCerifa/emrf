@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db } from './firebase';
-import './VendeurPage.css'; // We'll create this CSS file
+import './VendeurPage.css'; 
 
 const VendeurPage = () => {
   const [userData, setUserData] = useState(null);
@@ -21,7 +21,21 @@ const VendeurPage = () => {
       navigate('/login');
     }
   }, [navigate]);
-
+  const fetchCommande = async (uid) => {
+    try {
+      const produitsRef = collection(db, 'commandes');
+      const q = query(produitsRef, where('idVendeur', '==', uid));
+      const querySnapshot = await getDocs(q);
+      console.log(querySnapshot);
+      const fetchedCommande = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setProduits(fetchedCommande);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des produits:', error);
+    }
+  };
   const fetchProduits = async (uid) => {
     try {
       const produitsRef = collection(db, 'produits');
@@ -122,6 +136,41 @@ const VendeurPage = () => {
       ))}
     </div>
   );
+  const renderCommande = () => (
+    <div className="produits-grid">
+      {produits.map(produit => (
+        <div key={produit.id} className="produit-card">
+          <img 
+            src={produit.image} 
+            alt={produit.nom} 
+            className="produit-image"
+          />
+          <div className="produit-details">
+            
+            <p>description: {produit.description}</p>
+            <p>Prix: {produit.prix} </p>
+            <div className="produit-footer">
+              
+              <div className="produit-actions">
+                <button 
+                  className="btn-edit"
+                  onClick={() => navigate(`/modifier-produit/${produit.id}`)}
+                >
+                  Modifier
+                </button>
+                <button 
+                  className="btn-delete"
+                  onClick={() => setShowConfirmDelete(produit.id)}
+                >
+                  Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
   const renderProfil = () => {
     if (!userData) return null;
@@ -170,6 +219,7 @@ const VendeurPage = () => {
   const sidebarItems = [
     { label: 'Tableau de Bord', section: 'dashboard' },
     { label: 'Mes Produits', section: 'produits' },
+    {label: 'Mes Commandes', section: 'commandes'},
     { label: 'Mon Profil', section: 'profil' },
     { label: 'Ajouter Produit', action: () => navigate('/ajouter-produit') },
     { label: 'Déconnexion', action: handleDisconnect }
@@ -202,6 +252,7 @@ const VendeurPage = () => {
         {activeSection === 'dashboard' && renderDashboard()}
         {activeSection === 'produits' && renderProduits()}
         {activeSection === 'profil' && renderProfil()}
+        {activeSection === 'commandes' && renderCommande()}
       </main>
 
       {showConfirmDelete && (
