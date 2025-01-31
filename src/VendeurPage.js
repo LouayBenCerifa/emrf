@@ -7,6 +7,7 @@ import './VendeurPage.css';
 const VendeurPage = () => {
   const [userData, setUserData] = useState(null);
   const [produits, setProduits] = useState([]);
+  const [commandes, setCommandes] = useState([]);
   const [activeSection, setActiveSection] = useState('dashboard');
   const [showConfirmDelete, setShowConfirmDelete] = useState(null);
   const navigate = useNavigate();
@@ -21,21 +22,7 @@ const VendeurPage = () => {
       navigate('/login');
     }
   }, [navigate]);
-  const fetchCommande = async (uid) => {
-    try {
-      const produitsRef = collection(db, 'commandes');
-      const q = query(produitsRef, where('idVendeur', '==', uid));
-      const querySnapshot = await getDocs(q);
-      console.log(querySnapshot);
-      const fetchedCommande = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setProduits(fetchedCommande);
-    } catch (error) {
-      console.error('Erreur lors de la récupération des produits:', error);
-    }
-  };
+
   const fetchProduits = async (uid) => {
     try {
       const produitsRef = collection(db, 'produits');
@@ -48,6 +35,26 @@ const VendeurPage = () => {
       setProduits(fetchedProduits);
     } catch (error) {
       console.error('Erreur lors de la récupération des produits:', error);
+    }
+  };
+
+  const fetchCommande = async (uid) => {
+    try {
+      const commandesRef = collection(db, 'commandes');
+      const q = query(commandesRef);
+      const querySnapshot = await getDocs(q);
+      const fetchedCommandes = querySnapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter(commande => 
+          commande.produits.some(produit => produit.vendeurId === uid)
+        );
+      setCommandes(fetchedCommandes);
+      console.log(fetchedCommandes);  
+    } catch (error) {
+      console.error('Erreur lors de la récupération des commandes:', error);
     }
   };
 
@@ -75,7 +82,6 @@ const VendeurPage = () => {
           <h3>Statistiques Produits</h3>
           <div className="dashboard-stats">
             <p>Total Produits: {produits.length}</p>
-            
           </div>
         </div>
         <div className="dashboard-card">
@@ -111,11 +117,9 @@ const VendeurPage = () => {
             className="produit-image"
           />
           <div className="produit-details">
-            
-            <p>description: {produit.description}</p>
-            <p>Prix: {produit.prix} </p>
+            <p>Description: {produit.description}</p>
+            <p>Prix: {produit.prix} €</p>
             <div className="produit-footer">
-              
               <div className="produit-actions">
                 <button 
                   className="btn-edit"
@@ -136,39 +140,46 @@ const VendeurPage = () => {
       ))}
     </div>
   );
+
   const renderCommande = () => (
-    <div className="produits-grid">
-      {produits.map(produit => (
-        <div key={produit.id} className="produit-card">
-          <img 
-            src={produit.image} 
-            alt={produit.nom} 
-            className="produit-image"
-          />
-          <div className="produit-details">
-            
-            <p>description: {produit.description}</p>
-            <p>Prix: {produit.prix} </p>
-            <div className="produit-footer">
-              
-              <div className="produit-actions">
-                <button 
-                  className="btn-edit"
-                  onClick={() => navigate(`/modifier-produit/${produit.id}`)}
-                >
-                  Modifier
-                </button>
-                <button 
-                  className="btn-delete"
-                  onClick={() => setShowConfirmDelete(produit.id)}
-                >
-                  Supprimer
-                </button>
-              </div>
+    <div className="commandes-grid">
+      {commandes.length === 0 ? (
+        <p>Aucune commande trouvée</p>
+      ) : (
+        commandes.map(commande => (
+          <div key={commande.id} className="commande-card">
+            <div className="commande-header">
+              <h3>Commande Client</h3>
+              <p>Date: {new Date(commande.dateCommande).toLocaleDateString()}</p>
+            </div>
+            <div className="client-info">
+              <p>Nom: {commande.client.nom}</p>
+              <p>Prénom: {commande.client.prenom}</p>
+              <p>Adresse: {commande.client.adresse}</p>
+              <p>Mode Livraison: {commande.modeLivraison}</p>
+            </div>
+            <div className="commande-produits">
+              <h4>Vos Produits:</h4>
+              {commande.produits
+                .filter(produit => produit.vendeurId === userData.uid)
+                .map((produit, index) => (
+                  <div key={index} className="produit-item">
+                    <p>Nom: {produit.nom}</p>
+                    <p>Quantité: {produit.quantite}</p>
+                    <p>Total Produit: {produit.prix * produit.quantite} €</p>
+                  </div>
+                ))
+              }
+            </div>
+            <div className="commande-total">
+              <strong>Total Commande: {commande.produits
+                .filter(produit => produit.vendeurId === userData.uid)
+                .reduce((sum, produit) => sum + produit.prix * produit.quantite , 0)
+                .toFixed(2)} €</strong>
             </div>
           </div>
-        </div>
-      ))}
+        ))
+      )}
     </div>
   );
 
@@ -219,7 +230,14 @@ const VendeurPage = () => {
   const sidebarItems = [
     { label: 'Tableau de Bord', section: 'dashboard' },
     { label: 'Mes Produits', section: 'produits' },
-    {label: 'Mes Commandes', section: 'commandes'},
+    { 
+      label: 'Mes Commandes', 
+      section: 'commandes',
+      action: () => {
+        setActiveSection('commandes');
+        if (userData) fetchCommande(userData.uid);
+      }
+    },
     { label: 'Mon Profil', section: 'profil' },
     { label: 'Ajouter Produit', action: () => navigate('/ajouter-produit') },
     { label: 'Déconnexion', action: handleDisconnect }

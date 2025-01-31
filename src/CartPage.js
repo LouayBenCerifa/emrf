@@ -42,6 +42,7 @@ const CartPage = () => {
       produits: cartItems.map(item => ({
         id: item.id || 'id-inconnu',
         nom: item.nom || 'nom-inconnu',
+        prix: item.prix || 0,
         quantite: item.quantity || 1,
         vendeurId: item.idVendeur || 'inconnu',
       })),

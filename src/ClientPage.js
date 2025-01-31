@@ -68,7 +68,7 @@ const ClientPage = () => {
     if (product && product.id) {
       addToCart({
         id: product.id,
-        nom: product.nom || '',
+        nom: product.nomProduit || '',
         prix: product.prix || 0,
         idVendeur: product.vendeur || '',
         image: product.image || '',
