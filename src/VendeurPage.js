@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  deleteDoc, 
+  doc, 
+  updateDoc 
+} from 'firebase/firestore';
 import { db } from './firebase';
 import './VendeurPage.css'; 
 
@@ -52,7 +60,6 @@ const VendeurPage = () => {
           commande.produits.some(produit => produit.vendeurId === uid)
         );
       setCommandes(fetchedCommandes);
-      console.log(fetchedCommandes);  
     } catch (error) {
       console.error('Erreur lors de la récupération des commandes:', error);
     }
@@ -70,6 +77,30 @@ const VendeurPage = () => {
       setShowConfirmDelete(null);
     } catch (error) {
       console.error('Erreur lors de la suppression du produit:', error);
+    }
+  };
+
+  const handleApproveCommande = async (commandeId) => {
+    try {
+      await updateDoc(doc(db, 'commandes', commandeId), {
+        statut: 'Approuvée'
+      });
+      
+      if (userData) fetchCommande(userData.uid);
+    } catch (error) {
+      console.error('Erreur lors de l\'approbation de la commande:', error);
+    }
+  };
+
+  const handleRejectCommande = async (commandeId) => {
+    try {
+      await updateDoc(doc(db, 'commandes', commandeId), {
+        statut: 'Rejetée'
+      });
+      
+      if (userData) fetchCommande(userData.uid);
+    } catch (error) {
+      console.error('Erreur lors du rejet de la commande:', error);
     }
   };
 
@@ -142,43 +173,65 @@ const VendeurPage = () => {
   );
 
   const renderCommande = () => (
-    <div className="commandes-grid">
+    <div className="commandes-container">
+      <h2>Mes Commandes</h2>
       {commandes.length === 0 ? (
         <p>Aucune commande trouvée</p>
       ) : (
-        commandes.map(commande => (
-          <div key={commande.id} className="commande-card">
-            <div className="commande-header">
-              <h3>Commande Client</h3>
-              <p>Date: {new Date(commande.dateCommande).toLocaleDateString()}</p>
+        <div className="commandes-grid">
+          {commandes.map(commande => (
+            <div key={commande.id} className="commande-card">
+              <div className="commande-header">
+                <h3>Commande Client</h3>
+                <p>Date: {new Date(commande.dateCommande).toLocaleDateString()}</p>
+                <span className="commande-statut">
+                  {commande.statut || 'En attente'}
+                </span>
+              </div>
+              <div className="client-info">
+                <p>Nom: {commande.client.nom}</p>
+                <p>Prénom: {commande.client.prenom}</p>
+                <p>Adresse: {commande.client.adresse}</p>
+                <p>Mode Livraison: {commande.modeLivraison}</p>
+              </div>
+              <div className="commande-produits">
+                <h4>Vos Produits:</h4>
+                {commande.produits
+                  .filter(produit => produit.vendeurId === userData.uid)
+                  .map((produit, index) => (
+                    <div key={index} className="produit-item">
+                      <p>Nom: {produit.nom}</p>
+                      <p>Quantité: {produit.quantite}</p>
+                      <p>Total Produit: {produit.prix * produit.quantite} €</p>
+                    </div>
+                  ))
+                }
+              </div>
+              <div className="commande-total">
+                <strong>Total Commande: {commande.produits
+                  .filter(produit => produit.vendeurId === userData.uid)
+                  .reduce((sum, produit) => sum + produit.prix * produit.quantite , 0)
+                  .toFixed(2)} €</strong>
+              </div>
+              {commande.statut === 'En attente' && (
+                <div className="commande-actions">
+                  <button 
+                    className="btn-approve"
+                    onClick={() => handleApproveCommande(commande.id)}
+                  >
+                    Approuver
+                  </button>
+                  <button 
+                    className="btn-reject"
+                    onClick={() => handleRejectCommande(commande.id)}
+                  >
+                    Rejeter
+                  </button>
+                </div>
+              )}
             </div>
-            <div className="client-info">
-              <p>Nom: {commande.client.nom}</p>
-              <p>Prénom: {commande.client.prenom}</p>
-              <p>Adresse: {commande.client.adresse}</p>
-              <p>Mode Livraison: {commande.modeLivraison}</p>
-            </div>
-            <div className="commande-produits">
-              <h4>Vos Produits:</h4>
-              {commande.produits
-                .filter(produit => produit.vendeurId === userData.uid)
-                .map((produit, index) => (
-                  <div key={index} className="produit-item">
-                    <p>Nom: {produit.nom}</p>
-                    <p>Quantité: {produit.quantite}</p>
-                    <p>Total Produit: {produit.prix * produit.quantite} €</p>
-                  </div>
-                ))
-              }
-            </div>
-            <div className="commande-total">
-              <strong>Total Commande: {commande.produits
-                .filter(produit => produit.vendeurId === userData.uid)
-                .reduce((sum, produit) => sum + produit.prix * produit.quantite , 0)
-                .toFixed(2)} €</strong>
-            </div>
-          </div>
-        ))
+          ))}
+        </div>
       )}
     </div>
   );
