@@ -5,7 +5,9 @@ import { ArrowLeft, Trash2, Plus, Minus } from 'lucide-react';
 import { db } from './firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import './CartPage.css';
-
+const storedUserData = localStorage.getItem('userData');
+const parsedUserData = JSON.parse(storedUserData);
+console.log(parsedUserData.uid);
 const CartPage = () => {
   const { 
     cartItems, 
@@ -17,7 +19,7 @@ const CartPage = () => {
   const navigate = useNavigate();
   const [showDeliveryOptions, setShowDeliveryOptions] = useState(false);
   const [deliveryMethod, setDeliveryMethod] = useState('');
-  const [customerInfo, setCustomerInfo] = useState({ nom: '', prenom: '', adresse: '' });
+  const [customerInfo, setCustomerInfo] = useState({ idClient:parsedUserData.uid,nom: '', prenom: '', adresse: '' });
 
   const handleInputChange = (e) => {
     setCustomerInfo({ ...customerInfo, [e.target.name]: e.target.value });
@@ -47,6 +49,7 @@ const CartPage = () => {
         vendeurId: item.idVendeur || 'inconnu',
       })),
       satatus: 'En attente',
+      idClient: parsedUserData.uid,
       total: getTotalPrice(),
       modeLivraison: deliveryMethod || 'non-spécifié',
       client: {

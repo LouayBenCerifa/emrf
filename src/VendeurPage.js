@@ -7,7 +7,8 @@ import {
   getDocs, 
   deleteDoc, 
   doc, 
-  updateDoc 
+  updateDoc,
+  addDoc 
 } from 'firebase/firestore';
 import { db } from './firebase';
 import './VendeurPage.css'; 
@@ -31,6 +32,18 @@ const VendeurPage = () => {
       navigate('/login');
     }
   }, [navigate]);
+
+  const createNotification = async (idClient, message) => {
+    try {
+      await addDoc(collection(db, 'notifications'), {
+        idClient: idClient,
+        message: message,
+        dateCreation: new Date()
+      });
+    } catch (error) {
+      console.error('Erreur lors de la création de la notification:', error);
+    }
+  };
 
   const fetchProduits = async (uid) => {
     try {
@@ -81,11 +94,16 @@ const VendeurPage = () => {
     }
   };
 
-  const handleApproveCommande = async (commandeId) => {
+  const handleApproveCommande = async (commande) => {
     try {
-      await updateDoc(doc(db, 'commandes', commandeId), {
+      await updateDoc(doc(db, 'commandes', commande.id), {
         satatus: 'Approuvée'
       });
+      
+      await createNotification(
+        commande.idClient, 
+        `Votre commande du ${new Date(commande.dateCommande).toLocaleDateString()} a été approuvée.`
+      );
       
       if (userData) fetchCommande(userData.uid);
     } catch (error) {
@@ -93,11 +111,16 @@ const VendeurPage = () => {
     }
   };
 
-  const handleRejectCommande = async (commandeId) => {
+  const handleRejectCommande = async (commande) => {
     try {
-      await updateDoc(doc(db, 'commandes', commandeId), {
+      await updateDoc(doc(db, 'commandes', commande.id), {
         satatus: 'Rejetée'
       });
+      
+      await createNotification(
+        commande.client.nom, 
+        `Votre commande du ${new Date(commande.dateCommande).toLocaleDateString()} a été rejetée.`
+      );
       
       if (userData) fetchCommande(userData.uid);
     } catch (error) {
@@ -174,7 +197,6 @@ const VendeurPage = () => {
   );
 
   const renderCommande = () => {
-    // Filter commandes based on the selected status
     const filteredCommandes = commandes.filter(commande => {
       if (commandeFilter === 'tous') return true;
       return commande.satatus === commandeFilter;
@@ -240,13 +262,13 @@ const VendeurPage = () => {
                   <div className="commande-actions">
                     <button 
                       className="btn-approve"
-                      onClick={() => handleApproveCommande(commande.id)}
+                      onClick={() => handleApproveCommande(commande)}
                     > 
                       Approuver
                     </button>
                     <button 
                       className="btn-reject" 
-                      onClick={() => handleRejectCommande(commande.id)}
+                      onClick={() => handleRejectCommande(commande)}
                     >
                       Rejeter
                     </button>
