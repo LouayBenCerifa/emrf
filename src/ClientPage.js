@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { User, Menu, ShoppingCart, Search, LogOut } from 'lucide-react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { User, Menu, ShoppingCart, Search, LogOut, Bell, X } from 'lucide-react';
+import { 
+  collection, 
+  getDocs, 
+  query, 
+  where, 
+  deleteDoc, 
+  doc 
+} from 'firebase/firestore';
 import { db } from './firebase';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from './CartContext';
 import './ClientPage.css';
 
@@ -13,9 +20,19 @@ const ClientPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [userData, setUserData] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
   const { addToCart, getItemCount } = useCart();
   const navigate = useNavigate();
+
+  // Fetch user data and initial setup
+  useEffect(() => {
+    const storedUserData = localStorage.getItem('userData');
+    if (storedUserData) {
+      const parsedUserData = JSON.parse(storedUserData);
+      fetchNotifications(parsedUserData.uid);
+    }
+  }, []);
 
   // Fetch categories
   useEffect(() => {
@@ -35,7 +52,7 @@ const ClientPage = () => {
     fetchCategories();
   }, []);
 
-  // Fetch products
+  // Fetch products by category
   useEffect(() => {
     const fetchProducts = async () => {
       if (!selectedCategory) return;
@@ -47,10 +64,6 @@ const ClientPage = () => {
         const productsSnapshot = await getDocs(q);
         const productsList = productsSnapshot.docs.map(doc => ({
           id: doc.id,
-          nom: doc.data().nom || '',
-          prix: doc.data().prix || 0,
-          description: doc.data().description || '',
-          image: doc.data().image || '',
           ...doc.data()
         }));
         setProducts(productsList);
@@ -64,6 +77,25 @@ const ClientPage = () => {
     fetchProducts();
   }, [selectedCategory]);
 
+  // Fetch notifications
+  const fetchNotifications = async (uid) => {
+    try {
+      const notificationsRef = collection(db, 'notifications');
+      const q = query(notificationsRef, where('idClient', '==', uid));
+      const querySnapshot = await getDocs(q);
+      const fetchedNotifications = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        timestamp: doc.data().timestamp?.toDate() || new Date()
+      })).sort((a, b) => b.timestamp - a.timestamp);
+      
+      setNotifications(fetchedNotifications);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des notifications:', error);
+    }
+  };
+
+  // Add to cart handler
   const handleAddToCart = (product) => {
     if (product && product.id) {
       addToCart({
@@ -77,21 +109,73 @@ const ClientPage = () => {
     }
   };
 
+  // Logout handler
   const handleLogout = () => {
-    localStorage.removeItem('userData');
+    localStorage.removeItem('PauserData');
     navigate('/');
   };
 
-  // Filtre sécurisé des produits
+  // Toggle notifications
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
+  };
+
+  // Clear a specific notification
+  const clearNotification = async (notificationId) => {
+    try {
+      await deleteDoc(doc(db, 'notifications', notificationId));
+      setNotifications(notifications.filter(n => n.id !== notificationId));
+    } catch (error) {
+      console.error('Erreur lors de la suppression de la notification:', error);
+    }
+  };
+
+  // Filter products based on search term
   const filteredProducts = products.filter(product => {
     const searchLower = searchTerm.toLowerCase();
-    const productName = (product.nom || '').toLowerCase();
+    const productName = (product.nomProduit || '').toLowerCase();
     const productDescription = (product.description || '').toLowerCase();
     
     return productName.includes(searchLower) || 
            productDescription.includes(searchLower);
   });
 
+  // Render notifications dropdown
+  const renderNotificationsDropdown = () => (
+    <div className="notifications-dropdown">
+      <div className="notifications-header">
+        <h3>Notifications</h3>
+        <button 
+          className="close-notifications"
+          onClick={toggleNotifications}
+        >
+          <X />
+        </button>
+      </div>
+      {notifications.length === 0 ? (
+        <p className="no-notifications">Pas de notifications</p>
+      ) : (
+        notifications.map(notification => (
+          <div key={notification.id} className="notification-item">
+            <div className="notification-content">
+              <p>{notification.message}</p>
+              <small>
+                {notification.timestamp.toLocaleString()}
+              </small>
+            </div>
+            <button 
+              className="clear-notification"
+              onClick={() => clearNotification(notification.id)}
+            >
+              <X />
+            </button>
+          </div>
+        ))
+      )}
+    </div>
+  );
+
+  // Render loading state
   if (loading && !selectedCategory) {
     return (
       <div className="loading-container">
@@ -138,6 +222,22 @@ const ClientPage = () => {
           </div>
 
           <div className="nav-actions">
+            <div className="notifications-container">
+              <button 
+                className="notification-icon" 
+                onClick={toggleNotifications}
+              >
+                <Bell />
+                {notifications.length > 0 && (
+                  <span className="notification-badge">
+                    {notifications.length}
+                  </span>
+                )}
+              </button>
+              
+              {showNotifications && renderNotificationsDropdown()}
+            </div>
+
             <button
               className="profile-button"
               onClick={() => navigate('/profile')}
@@ -179,7 +279,7 @@ const ClientPage = () => {
                   <div className="product-image-container">
                     <img 
                       src={product.image || '/placeholder-image.jpg'} 
-                      alt={product.nom || 'Produit'}
+                      alt={product.nomProduit || 'Produit'}
                       className="product-image"
                       onError={(e) => {
                         e.target.onerror = null;
