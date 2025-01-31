@@ -19,6 +19,7 @@ export const CartProvider = ({ children }) => {
     try {
       const localCart = localStorage.getItem('cart');
       return localCart ? JSON.parse(localCart) : [];
+      console.log(localCart);   
     } catch (error) {
       console.error('Erreur lors de la lecture du localStorage:', error);
       return [];
