@@ -205,3 +205,87 @@
   background-color: #e74c3c;
   color: white;
 }
+.commandes-container {
+  padding: 20px;
+}
+
+.commandes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.commande-card {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  transition: transform 0.3s ease;
+}
+
+.commande-card:hover {
+  transform: translateY(-5px);
+}
+
+.commande-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.status-badge {
+  background-color: #e0e0e0;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.8em;
+}
+
+.commande-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.commande-id {
+  font-weight: bold;
+  color: #666;
+}
+
+.commande-date {
+  color: #888;
+  font-size: 0.9em;
+}
+
+.produit-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #fff;
+  border-radius: 4px;
+}
+
+.produit-details {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.produit-thumbnail {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.commande-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #e0e0e0;
+}
