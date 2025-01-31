@@ -186,7 +186,7 @@ function AdminPage() {
                   {products.map((product) => (
                     <tr key={product.id}>
                       <td>{product.id}</td>
-                      <td>{product.nom}</td>
+                      <td>{product.nomProduit}</td>
                       <td>{product.prix}</td>
                       <td>
                         <Button onClick={() => handleEdit(product)}><Edit /></Button>
