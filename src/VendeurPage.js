@@ -18,6 +18,7 @@ const VendeurPage = () => {
   const [commandes, setCommandes] = useState([]);
   const [activeSection, setActiveSection] = useState('dashboard');
   const [showConfirmDelete, setShowConfirmDelete] = useState(null);
+  const [commandeFilter, setCommandeFilter] = useState('tous');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -83,7 +84,7 @@ const VendeurPage = () => {
   const handleApproveCommande = async (commandeId) => {
     try {
       await updateDoc(doc(db, 'commandes', commandeId), {
-        statut: 'Approuvée'
+        satatus: 'Approuvée'
       });
       
       if (userData) fetchCommande(userData.uid);
@@ -95,7 +96,7 @@ const VendeurPage = () => {
   const handleRejectCommande = async (commandeId) => {
     try {
       await updateDoc(doc(db, 'commandes', commandeId), {
-        statut: 'Rejetée'
+        satatus: 'Rejetée'
       });
       
       if (userData) fetchCommande(userData.uid);
@@ -172,69 +173,92 @@ const VendeurPage = () => {
     </div>
   );
 
-  const renderCommande = () => (
-    <div className="commandes-container">
-      <h2>Mes Commandes</h2>
-      {commandes.length === 0 ? (
-        <p>Aucune commande trouvée</p>
-      ) : (
-        <div className="commandes-grid">
-          {commandes.map(commande => (
-            <div key={commande.id} className="commande-card">
-              <div className="commande-header">
-                <h3>Commande Client</h3>
-                <p>Date: {new Date(commande.dateCommande).toLocaleDateString()}</p>
-                <span className="commande-statut">
-                  {commande.statut || 'En attente'}
-                </span>
-              </div>
-              <div className="client-info">
-                <p>Nom: {commande.client.nom}</p>
-                <p>Prénom: {commande.client.prenom}</p>
-                <p>Adresse: {commande.client.adresse}</p>
-                <p>Mode Livraison: {commande.modeLivraison}</p>
-              </div>
-              <div className="commande-produits">
-                <h4>Vos Produits:</h4>
-                {commande.produits
-                  .filter(produit => produit.vendeurId === userData.uid)
-                  .map((produit, index) => (
-                    <div key={index} className="produit-item">
-                      <p>Nom: {produit.nom}</p>
-                      <p>Quantité: {produit.quantite}</p>
-                      <p>Total Produit: {produit.prix * produit.quantite} €</p>
-                    </div>
-                  ))
-                }
-              </div>
-              <div className="commande-total">
-                <strong>Total Commande: {commande.produits
-                  .filter(produit => produit.vendeurId === userData.uid)
-                  .reduce((sum, produit) => sum + produit.prix * produit.quantite , 0)
-                  .toFixed(2)} €</strong>
-              </div>
-              {commande.statut === 'En attente' && (
-                <div className="commande-actions">
-                  <button 
-                    className="btn-approve"
-                    onClick={() => handleApproveCommande(commande.id)}
-                  >
-                    Approuver
-                  </button>
-                  <button 
-                    className="btn-reject"
-                    onClick={() => handleRejectCommande(commande.id)}
-                  >
-                    Rejeter
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
+  const renderCommande = () => {
+    // Filter commandes based on the selected status
+    const filteredCommandes = commandes.filter(commande => {
+      if (commandeFilter === 'tous') return true;
+      return commande.satatus === commandeFilter;
+    });
+
+    return (
+      <div className="commandes-container">
+        <h2>Mes Commandes</h2>
+        
+        <div className="commande-filter">
+          <label>Filtrer par statut: </label>
+          <select 
+            value={commandeFilter} 
+            onChange={(e) => setCommandeFilter(e.target.value)}
+            className="status-select"
+          >
+            <option value="tous">Tous</option>
+            <option value="En attente">En attente</option>
+            <option value="Approuvée">Approuvée</option>
+            <option value="Rejetée">Rejetée</option>
+          </select>
         </div>
-      )}
-    </div>
-  );
+
+        {filteredCommandes.length === 0 ? (
+          <p>Aucune commande trouvée</p>
+        ) : (
+          <div className="commandes-grid">
+            {filteredCommandes.map(commande => (
+              <div key={commande.id} className="commande-card">
+                <div className="commande-header">
+                  <h3>Commande Client</h3>
+                  <p>Date: {new Date(commande.dateCommande).toLocaleDateString()}</p>
+                  <span className={`commande-statut ${commande.satatus?.toLowerCase().replace(/\s+/g, '-')}`}>
+                    {commande.satatus || 'En attente'}
+                  </span>
+                </div>
+                <div className="client-info">
+                  <p>Nom: {commande.client.nom}</p>
+                  <p>Prénom: {commande.client.prenom}</p>
+                  <p>Adresse: {commande.client.adresse}</p>
+                  <p>Mode Livraison: {commande.modeLivraison}</p>
+                </div>
+                <div className="commande-produits">
+                  <h4>Vos Produits:</h4>
+                  {commande.produits
+                    .filter(produit => produit.vendeurId === userData.uid)
+                    .map((produit, index) => (
+                      <div key={index} className="produit-item">
+                        <p>Nom: {produit.nom}</p>
+                        <p>Quantité: {produit.quantite}</p>
+                        <p>Total Produit: {produit.prix * produit.quantite} €</p>
+                      </div>
+                    ))
+                  }
+                </div>
+                <div className="commande-total">
+                  <strong>Total Commande: {commande.produits
+                    .filter(produit => produit.vendeurId === userData.uid)
+                    .reduce((sum, produit) => sum + produit.prix * produit.quantite, 0)
+                    .toFixed(2)} €</strong>
+                </div>
+                {commande.satatus === 'En attente' && (
+                  <div className="commande-actions">
+                    <button 
+                      className="btn-approve"
+                      onClick={() => handleApproveCommande(commande.id)}
+                    > 
+                      Approuver
+                    </button>
+                    <button 
+                      className="btn-reject" 
+                      onClick={() => handleRejectCommande(commande.id)}
+                    >
+                      Rejeter
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderProfil = () => {
     if (!userData) return null;

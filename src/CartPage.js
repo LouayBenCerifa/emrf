@@ -46,6 +46,7 @@ const CartPage = () => {
         quantite: item.quantity || 1,
         vendeurId: item.idVendeur || 'inconnu',
       })),
+      satatus: 'En attente',
       total: getTotalPrice(),
       modeLivraison: deliveryMethod || 'non-spécifié',
       client: {
