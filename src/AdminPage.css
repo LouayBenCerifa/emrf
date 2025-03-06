@@ -15,19 +15,19 @@ body {
 /* Sidebar */
 .sidebar {
   width: 250px;
-  background-color: #1a202c;
+  background-color: #fff0e6;
   padding: 20px;
   height: 100vh;
   position: fixed;
   top: 0;
   left: 0;
-  color: white;
+  color: rgb(3, 0, 87);
 }
 
 .sidebar h2 {
   font-size: 24px;
   margin-bottom: 30px;
-  color: #fff;
+  color: #e45913;
 }
 
 .sidebar nav ul {
@@ -41,7 +41,7 @@ body {
 .sidebar nav ul li button {
   background: none;
   border: none;
-  color: #fff;
+  color: #f06a17;
   font-size: 18px;
   display: flex;
   align-items: center;
@@ -51,7 +51,7 @@ body {
 }
 
 .sidebar nav ul li button:hover {
-  background-color: #2d3748;
+  background-color: #f5d5a2;
 }
 
 .sidebar nav ul li button.active {
@@ -87,7 +87,7 @@ body {
 }
 
 .user-table th, .product-table th, .category-table th {
-  background-color: #2b6cb0;
+  background-color: #fa9420;
   color: white;
   padding: 10px;
   text-align: left;
@@ -105,7 +105,7 @@ button {
 }
 
 button:hover {
-  color: #3182ce;
+  color: #fdb857;
 }
 
 .add-category-section {
@@ -122,13 +122,13 @@ button:hover {
 }
 
 button {
-  background-color: #3182ce;
-  color: white;
+  background-color: #faaf54;
+  color: rgb(236, 146, 57);
   padding: 10px 20px;
   border-radius: 5px;
 }
 
 button:hover {
-  background-color: #2b6cb0;
+  background-color: #f5ae2c;
 }
 
