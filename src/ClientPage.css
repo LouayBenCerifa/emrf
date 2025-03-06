@@ -2,9 +2,9 @@
 :root {
   --primary-color: #4a6de5;
   --primary-hover: #3a5bd0;
-  --secondary-color: #f8f9fa;
+  --secondary-color: #fafaf8;
   --text-primary: #333333;
-  --text-secondary: #6c757d;
+  --text-secondary: #ff9a2e;
   --border-color: #e0e0e0;
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);
@@ -86,18 +86,19 @@ body {
 /* Menu icon */
 .menu-icon {
   position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: var(--text-secondary);
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  padding: var(--spacing-xs);
-  border-radius: 50%;
-  transition: background-color 0.2s;
-  width: 35px;
-  height: 35px;
+    margin-left: 35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: 50%;
+    transition: background-color 0.2s;
+    width: 35px;
+    height: 35px;
 }
 
 .menu-icon:hover {
