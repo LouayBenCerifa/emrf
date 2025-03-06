@@ -46,7 +46,7 @@
 }
 
 .sidebar-nav button:hover {
-  background-color: #f68f3b;
+  background-color: #3498db;
 }
 
 .main-content {
@@ -77,7 +77,7 @@
   width: 100%;
   padding: 10px;
   margin-top: 10px;
-  background-color: var(--primary-color);
+
   color: white;
   border: none;
   border-radius: 4px;
